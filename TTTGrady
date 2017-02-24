@@ -1,0 +1,401 @@
+/** Grady McPeak
+ * Dr. Brown
+ * 
+ * G Period Programming and Algorithms
+ * 6/8/16
+ * 
+ * "TTT Grady"
+ * 
+ * See also: classes "Board" and "Piece"
+ */
+
+/** PROGRAM DESCRIPTION
+ * This is a game of Tic-Tac-Toe, complete with a board made of ASCII Graphics, a main menu, three save files, 
+ * memory allocated for the player's names, and an algorithm to check fo a winner of a game.
+ */
+
+import javax.swing.JOptionPane;
+
+public class TTTGrady 
+{
+    static Board [] game = new Board [4];
+    
+    public static void main (String args [])
+    
+    /** VARIABLE DICTIONARY
+     * done (boolean) - true once the user has decided to be done with the program, false until then
+     */
+    
+    {
+        initializeGame();
+        boolean done = start();
+        
+        while (done == false)
+        {
+            done = playGame ();
+        }
+        
+        endGame ();
+    }
+    
+    
+    public static boolean start ()
+    
+    /** VARIABLE DICTIONARY
+     * choice (String) - an input letter that corresponds to if the user wants to read rules, play a game, or quit the program
+     * chosen (boolean) - false until the user has selected a valid letter that corresponds to a course of action for the program to take
+     * done (boolean) - true once the user has decided to be done with the program, false until then
+     */
+    
+    {
+        String choice = JOptionPane.showInputDialog ("Welcome to Tic-Tac-Toe! Type 'g' to start the game, 'r' to read the rules,"+
+        " and 'q' to quit the program.");
+        
+        boolean done = false;
+        boolean chosen = false;
+        
+        while (chosen == false) //will not let the player continue until a valid decision has been made
+        {
+            if (choice.compareTo ("g") == 0)
+            {
+                chosen = true;
+            }
+            else
+            if (choice.compareTo ("r") == 0)
+            {
+                chosen = true;
+                readRules ();
+            }
+            else
+            if (choice.compareTo ("q") == 0)
+            {
+                done = true;
+                chosen = true;
+                endGame();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog (null, "Invalid input! Try again.");
+                chosen = false;
+                choice = JOptionPane.showInputDialog ("Welcome to Tic-Tac-Toe! Type 'g' to start the game, 'r' to read the rules,"+
+                " and 'q' to quit the program.");
+            }
+        }
+        
+        return (done);
+    }
+    
+    
+    public static boolean playGame ()
+    
+    /** VARIABLE DICTIONARY
+     * chosen (boolean) - false until a user has made their next menu selection
+     * column (int) - the desired column the player wishes to put a piece in in a specific turn
+     * done (boolean) - true once the user has decided to be done with the program, false until then
+     * gameImage (String) - the ASCII graphic game board for the game
+     * message (String) - shows up every turn, informing the player of what the obar looks like and how to play
+     * move (String) - the player's input desired row and column they'd like to put a mark in
+     * names (Piece) - a place to store the input names of the users
+     * row (int) - the row the player has decided to move in
+     * thisGame (int) - the save file in which a person would like to play a game
+     * thisPlayer (String) - the player whose turn it currently is
+     * turn (int) - counts the number of turns taken in the game
+     * used (boolean) - determines if a space is already taken up by another piece
+     * winner (boolean) - false until it has been determined that someone (or no one) has won the game
+     */
+    
+    {
+        boolean winner = false;
+        
+        int thisGame = pickFile ();
+        
+        Piece names = new Piece ();
+        names.setWhichPlayer ();
+
+        game[thisGame].initializeBoard();
+        
+        boolean done = false;
+        
+          
+        while (winner != true) //will not stop until a winner has been declared
+        {
+            for (int turn = 1; turn <=9; turn++) //max possible turns is 9
+            {
+                String gameImage = game[thisGame].getImage();
+                String thisPlayer = names.getWhichPlayer (turn);
+                String message = ("It is your turn, " + thisPlayer + "."
+                + "\nType in the row first, then the column you would like to put a piece in, separated "
+                + "by a comma. \nFor example '1,1'"); //all this is what the player sees on screen
+                
+                String move = JOptionPane.showInputDialog(gameImage + message); 
+                
+                int row = Character.getNumericValue(move.charAt(0)); //becomes first input #
+
+                int column = Character.getNumericValue(move.charAt(2)); //second #
+                
+                boolean used = false;
+                
+                used = game[thisGame].checkIfUsed (row, column, used);
+            
+                while (used == true || row < 0 || row >=4 || column < 0 || column >= 4) //makes sure input is valid entry on the board
+                {
+                    JOptionPane.showMessageDialog (null, "Invalid input!");
+                    
+                    move = JOptionPane.showInputDialog (gameImage + message);
+                
+                    row = Character.getNumericValue(move.charAt(0));
+
+                    column = Character.getNumericValue(move.charAt(2));
+                
+                    used = game[thisGame].checkIfUsed(row, column, used);
+                }
+                
+                game[thisGame].setSpace(row, column, turn); 
+                
+                if (turn >= 5) //not possible to win in under 5 total turns
+                {
+                    winner = check (turn, thisGame);
+                    
+                    if (winner == true)
+                    {
+                        gameImage = game[thisGame].getImage();
+                        JOptionPane.showMessageDialog (null, gameImage + "\n \n" + thisPlayer + ", you won!");
+                        
+                        turn = 10;
+                    }
+                    else
+                    if (turn == 9)
+                    {
+                        winner = true; //no winner actually found, but tie, so game over nonetheless
+                        JOptionPane.showMessageDialog (null, "Cat game! \n The game was a tie...");
+                    }
+                    else
+                    {
+                        winner = false;
+                    }
+                }
+            }
+        }
+        
+        String choice = JOptionPane.showInputDialog ("Would you like to play again? Type 'y' for yes and 'n' for no.");
+         
+        for (boolean chosen = false; chosen == false;) //checks for what course of action player wishes to take next
+        {
+            if (choice.compareTo ("y") == 0)
+            {
+                done = false;
+                chosen = true;
+            }
+            else
+            if (choice.compareTo ("n") == 0)
+            {
+                done = true;
+                chosen = true;
+            }
+            else
+            {
+                JOptionPane.showMessageDialog (null, "Invalid input! Try again...");
+            }
+        }
+        
+        return (done);
+    }
+    
+    public static boolean check(int turn, int thisGame)
+  
+    /** VARIABLE DICTIONARY
+    * count1, count2 (int) - used to extact specific series of spaces on the board to compare to "probe" for a win
+    * ex (String) - used to compare to "probe" to see if the X-player won
+    * oh (String - used to compare to "probe" to see if the O-player won 
+    * probe (String) - used to go through each column, row, and diagonal and look for matches
+    * thisGame (int) - the number of the current save file in which the users are playing 
+    * turn (int) - the current turn of the game (counts up one every time a move is made)
+    * win (boolean) - false until a winning combination has been identified
+    */
+  
+    {
+        String probe = "";
+        
+        String ex = "[__X__][__X__][__X__]"; //these two vars are used to check for wins
+        String oh = "[__O__][__O__][__O__]"; // 3 x's or o's in a row in "probe" means a win
+        boolean win = false;
+        
+        if (win == false) //checks for a win by filling up a whole row
+        {
+            for (int count1 = 1; count1 <= 3; count1 ++)
+            {   
+                for (int count2 = 1; count2 <= 3; count2 ++)
+                {
+                   probe = probe + game[thisGame].getSpaces(count1, count2);
+                }
+                
+                if (turn % 2 == 0) //determines which player could possibly have just won
+                   {
+                       if (probe.equals(oh))
+                       {
+                           win = true;
+                       }
+                }
+                else
+                {
+                       if (probe.equals (ex))
+                       {
+                           win = true;
+                       }
+                }
+                   
+                probe = ""; //clears former data for next comparison
+            }
+        }
+        
+        probe = "";
+        
+        if (win == false) //checks a win by filling a whole column
+        {
+            for (int count1 = 1; count1 <= 3; count1 ++)
+            {   
+                for (int count2 = 1; count2 <= 3; count2 ++)
+                {
+                   probe = probe + game[thisGame].getSpaces(count2, count1); //notice here how they are flipped.. column stays static while row changes
+                }
+                
+                if (turn % 2 == 0)
+                   {
+                       if (probe.equals (oh))
+                       {
+                           win = true;
+                       }
+                   }
+                   else
+                   {
+                       if (probe.equals (ex))
+                       {
+                           win = true;
+                       }
+                   }
+                   
+                   probe = "";
+            }
+        }
+        
+        probe = "";
+        
+        if (win == false) //fill in diagonals
+        {
+                probe = probe + game[thisGame].getSpaces(1,3);
+                probe = probe + game[thisGame].getSpaces(2,2);
+                probe = probe + game[thisGame].getSpaces(3,1);
+                
+                if (turn % 2 == 0)
+                   {
+                       if (probe.compareTo (oh) ==0)
+                       {
+                           win = true;
+                       }
+                   }
+                   else
+                   {
+                       if (probe.compareTo (ex) ==0)
+                       {
+                           win = true;
+                       }
+                   }
+                   
+                   probe = "";
+        }
+        
+        if (win == false) //fill in diagonals
+        {
+                probe = probe + game[thisGame].getSpaces(1,1);
+                probe = probe + game[thisGame].getSpaces(2,2);
+                probe = probe + game[thisGame].getSpaces(3,3);
+                
+                if (turn % 2 == 0)
+                   {
+                       if (probe.compareTo (oh) ==0)
+                       {
+                           win = true;
+                       }
+                   }
+                   else
+                   {
+                       if (probe.compareTo (ex) ==0)
+                       {
+                           win = true;
+                       }
+                   }
+                   
+                   probe = "";
+        }
+        
+        return (win);
+        }
+
+    
+    public static void initializeGame ()
+    
+    /** VARIABLE DICTIONARY
+     * count (int) - used to count off the amount of save files being initialized
+     */
+    
+    {
+        for (int count = 1; count < game.length; count ++)
+        {
+            game[count] = new Board(); //creating the 3 save files to play in
+        }
+    }
+    
+    
+    public static int pickFile ()
+    
+    /** VARIABLE DICTIONARY
+     * thisGame (int) - the number of the file the user wishes to play in
+     */
+    
+    {
+        int thisGame = 0;
+        
+        while (thisGame == 0)
+        {   
+            thisGame = Integer.parseInt (JOptionPane.showInputDialog
+                ("Which save file would you like to play in? You have 3 files to choose from. Type in a number (1-3) to choose a file..."));
+                
+            if (thisGame > 0 && thisGame < 4)
+            {
+            }
+            else
+            {
+                JOptionPane.showMessageDialog (null, "Invalid input! Try again...");
+                thisGame = 0; //is now zero again, continuing the loop until valid input found
+            }
+        }
+        
+        return (thisGame);
+    }
+    
+    
+    public static void readRules ()
+    
+    /** VARIABLE DICTIONARY
+     * (no variables present)
+     */
+    
+    {
+        JOptionPane.showMessageDialog (null,"The object of Tic Tac Toe is to get three in a row. \n"
+        + "You play on a three by three game board. \n"
+        + "The first player is known as X and the second is O. \n"
+        + "Players alternate placing Xs and Os on the game board until either oppent has three in a row or all nine squares are filled. \n"
+        + "X always goes first, and in the event that no one has three in a row, the stalemate is called a cat game. \n");
+    }
+    
+    
+    public static void endGame ()
+    
+    /** VARIABLE DICTIONARY
+     * (no variables present)
+     */
+    
+    {
+        JOptionPane.showMessageDialog (null, "Thanks for playing!");
+    }
+}
