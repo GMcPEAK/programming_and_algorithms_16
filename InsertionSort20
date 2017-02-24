@@ -1,0 +1,67 @@
+/** Grady McPeak
+ * Dr. Brown
+ * Programming and Algorithms, G Period
+ * 2/29/16
+ */
+/**PROGRAM DESCRIPTION
+ * Title: "Insetion Sort 20"
+ * This program can take 20 randomly generated integers and sort them in ascending order using an inserion sort.
+ * It will print the original and sorted order of the integers
+ */
+
+/** VARIABLE DICTIONARY (main method)
+ * count (int) - counts how many integers have been generated and stored, also for concatenation of sorted integers
+ * numbers (int, []) - where all 20 randomly generated numbers are stored and sorted
+ * originalOrder (String) - a concatenation of all the integers in their original order
+ * sortedOrder (String) - a concatenation of all the 20 integers in their sorted order
+ */
+
+import javax.swing.JOptionPane;
+public class InsertionSort20
+{
+    public static void main (String args [])
+    {
+        int numbers [] = new int [20];
+        String originalOrder = "";
+        
+        for (int count = 1; count < numbers.length; count++)
+        {
+            numbers[count] = (int)(Math.random ()*100)+1;
+            originalOrder = originalOrder + " " + numbers[count];
+        }
+        
+        insertionSort (numbers);
+        String sortedOrder = "";
+        
+        for (int count = 1; count < numbers.length; count ++)
+        {
+            sortedOrder = sortedOrder + " " + numbers[count];    
+        }
+        
+        JOptionPane.showMessageDialog (null, "The original order of numbers was" + originalOrder + ". The same numbers, sorted, are" + sortedOrder + ".");
+    }
+    
+    /** VARIABLE DICTIONARY (method, "insertionSort”)
+     * i (int) - one of two variables used for comparing and insertion of the integers of the array
+     * j (int) - the second two variables used for comapring and insertion of the integers of the array
+     * key (int) - the specific element currently being evauluated and sorted
+     * num (int, []) - this method's version of the array "numbers" (see main method)
+     */
+    
+    public static void insertionSort (int [] num)
+    {
+        int j;                  // the number of items sorted so far
+        int key;                // the item to be inserted
+        int i; 
+
+        for (j = 1; j < num.length; j++)    // Start with 1 (not 0)
+        {
+          key = num[ j ];
+          for(i = j - 1; (i >= 0) && (key < num [i]); i--)   // larger values are moving up
+          {
+                 num[ i+1 ] = num[ i ];
+          }
+          num[ i+1 ] = key;// Put the key in its proper location
+        }
+    }
+}
